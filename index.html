@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>沙雕智能体 — 大魏王朝</title>
+  <meta name="description" content="沙雕智能体 1.0：大魏王朝 — 与沙雕人物一起探索 AI 的奥秘。Claude Agent SDK 集成，多模型选择，盲盒抽卡收集。" />
+  <link rel="icon" href="images/shadiao-logo.png" type="image/png" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter Variable', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            surface:   '#121212',
+            elevated:  '#1a1a1a',
+            card:      '#212121',
+            border:    '#383838',
+            muted:     '#a3a3a3',
+            foreground:'#fafafa',
+            'rarity-common':    '#34d399',
+            'rarity-rare':      '#60a5fa',
+            'rarity-epic':      '#c084fc',
+            'rarity-legendary': '#fbbf24',
+          },
+          animation: {
+            'fade-up': 'fadeUp 0.6s ease-out both',
+            'glow': 'glow 2s ease-in-out infinite',
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeUp: {
+              from: { opacity: '0', transform: 'translateY(24px)' },
+              to:   { opacity: '1', transform: 'translateY(0)' },
+            },
+            glow: {
+              '0%,100%': { boxShadow: '0 0 20px rgba(168,85,247,0.15), 0 0 40px rgba(168,85,247,0.05)' },
+              '50%':     { boxShadow: '0 0 30px rgba(168,85,247,0.3), 0 0 60px rgba(168,85,247,0.12)' },
+            },
+            float: {
+              '0%,100%': { transform: 'translateY(0)' },
+              '50%':     { transform: 'translateY(-10px)' },
+            },
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* ===== 全局 ===== */
+    body {
+      background: linear-gradient(180deg, #1a1a1a 0%, #121212 100%);
+      color: #fafafa;
+      font-feature-settings: 'cv11', 'ss01', 'ss03', 'tnum';
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    ::selection {
+      background-color: rgba(168,85,247,0.25);
+      color: #fafafa;
+    }
+
+    /* ===== 品牌渐变文字 ===== */
+    .text-brand {
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ===== App 图标光晕 ===== */
+    .icon-glow {
+      box-shadow:
+        0 0 40px rgba(96,165,250,0.15),
+        0 0 80px rgba(168,85,247,0.10),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    /* ===== 卡片通用 ===== */
+    .card-base {
+      background: #212121;
+      border: 1px solid #383838;
+      border-radius: 6px;
+      box-shadow: 0 4px 16px -4px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .card-base:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px -4px rgba(0,0,0,0.6), 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10);
+    }
+
+    /* ===== 人物卡片 ===== */
+    .char-card {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 0 16px 0;
+    }
+    .char-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .char-card .char-info {
+      padding: 8px 12px 0;
+      text-align: center;
+    }
+
+    /* 稀有度边框线（卡片顶部色条） */
+    .rarity-common    { border-top: 3px solid #34d399; }
+    .rarity-rare      { border-top: 3px solid #60a5fa; }
+    .rarity-epic      { border-top: 3px solid #c084fc; }
+    .rarity-legendary { border-top: 3px solid #fbbf24; }
+
+    /* 稀有度 hover 光晕 */
+    .char-card.rarity-common:hover    { box-shadow: 0 8px 32px -4px rgba(52,211,153,0.2), 0 4px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.10); border-color: rgba(52,211,153,0.4); }
+    .char-card.rarity-rare:hover      { box-shadow: 0 8px 32px -4px rgba(96,165,250,0.2), 0 4px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.10); border-color: rgba(96,165,250,0.4); }
+    .char-card.rarity-epic:hover      { box-shadow: 0 8px 32px -4px rgba(192,132,252,0.25),0 4px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.10); border-color: rgba(192,132,252,0.5); }
+    .char-card.rarity-legendary:hover { box-shadow: 0 8px 32px -4px rgba(251,191,36,0.3), 0 4px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.10); border-color: rgba(251,191,36,0.5); }
+
+    /* 隐藏款黑影 */
+    .char-media {
+      position: relative;
+      width: 100%;
+    }
+    .char-hidden img {
+      filter: brightness(0) opacity(0.85);
+    }
+    .char-hidden .hidden-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.5) 100%);
+    }
+
+    /* ===== 下载按钮 ===== */
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 15px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(96,165,250,0.3);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 4px 16px rgba(96,165,250,0.45);
+      transform: translateY(-1px);
+    }
+    .btn-outline {
+      border: 1px solid #525252;
+      color: #fafafa;
+      background: rgba(255,255,255,0.04);
+    }
+    .btn-outline:hover {
+      border-color: #a3a3a3;
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* ===== 微信公众号 ===== */
+    .wechat-qr {
+      display: none;
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-bottom: 12px;
+      background: #212121;
+      border: 1px solid #383838;
+      border-radius: 6px;
+      padding: 12px;
+      box-shadow: 0 16px 32px -8px rgba(0,0,0,0.7);
+      z-index: 10;
+    }
+    .wechat-trigger:hover .wechat-qr,
+    .wechat-trigger:active .wechat-qr {
+      display: block;
+    }
+    /* 移动端点击 toggle */
+    .wechat-trigger.show-qr .wechat-qr {
+      display: block;
+    }
+    .wechat-qr-placeholder {
+      width: 160px;
+      height: 160px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    /* ===== 渐入动画 ===== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== 背景装饰 ===== */
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    /* ===== 滚动条 ===== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+
+    @media (max-width: 640px) {
+      .btn-download { padding: 10px 20px; font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== ① Hero 首屏 ===== -->
+  <header class="relative min-h-screen flex flex-col items-center justify-center px-4 py-20 text-center overflow-hidden">
+    <!-- 背景光球 -->
+    <div class="bg-orb w-[500px] h-[500px] bg-blue-500 -top-20 -left-20"></div>
+    <div class="bg-orb w-[400px] h-[400px] bg-purple-500 bottom-20 right-0"></div>
+    <div class="bg-orb w-[300px] h-[300px] bg-amber-500 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+
+    <!-- App 图标 -->
+    <div class="icon-glow rounded-[18%] mb-8 animate-float">
+      <img src="images/shadiao-logo.png" alt="沙雕智能体" class="w-24 h-24 sm:w-28 sm:h-28 rounded-[18%]" />
+    </div>
+
+    <!-- 标题 -->
+    <h1 class="text-3xl sm:text-5xl font-bold tracking-tight mb-3 animate-fade-up" style="animation-delay:0.1s">
+      沙雕智能体 <span class="text-brand">1.0</span>
+    </h1>
+    <p class="text-base sm:text-lg text-[#a3a3a3] mb-10 max-w-md animate-fade-up" style="animation-delay:0.2s">
+      <span class="text-[#a3a3a3]/40 mr-1">之</span>
+      <span class="inline-block px-2 py-0.5 border border-amber-400/30 rounded text-xs sm:text-sm font-bold text-amber-400/70"
+        style="box-shadow: 0 0 8px rgba(251,191,36,0.06), inset 0 0 8px rgba(251,191,36,0.02)">
+        大魏王朝
+      </span>
+      <br class="sm:hidden" />
+      <span class="sm:ml-2">与沙雕人物一起探索 AI 的奥秘！</span>
+    </p>
+
+    <!-- 下载按钮 -->
+    <div class="flex flex-wrap gap-3 justify-center animate-fade-up" style="animation-delay:0.3s">
+      <a href="#" class="btn-download btn-primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v12"/><path d="m9 10 3 3 3-3"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg>
+        下载 macOS 版
+      </a>
+      <a href="#" class="btn-download btn-outline">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        下载 Windows 版
+      </a>
+    </div>
+
+    <!-- 向下箭头 -->
+    <div class="absolute bottom-8 opacity-40 animate-float">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+  </header>
+
+  <!-- ===== ③ 核心特性 ===== -->
+  <section class="max-w-5xl mx-auto px-4 py-16 sm:py-20">
+    <div class="text-center mb-12 reveal">
+      <h2 class="text-2xl sm:text-3xl font-bold mb-3">智能体核心特性</h2>
+      <p class="text-[#a3a3a3] max-w-md mx-auto">
+        不只是工作/学习，更是一个有灵魂的 AI 伙伴
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+      <!-- 特性 1 -->
+      <div class="card-base p-6 reveal">
+        <div class="w-10 h-10 rounded-md bg-blue-400/10 flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <h3 class="text-sm font-semibold mb-2">Claude Agent SDK 集成</h3>
+        <p class="text-xs sm:text-sm text-[#a3a3a3] leading-relaxed">基于 Anthropic 官方 Agent SDK，支持自主规划、工具调用、多轮深度对话。Agent 可以自主编写代码、管理文件、搜索网络。</p>
+      </div>
+
+      <!-- 特性 2 -->
+      <div class="card-base p-6 reveal">
+        <div class="w-10 h-10 rounded-md bg-purple-400/10 flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3 class="text-sm font-semibold mb-2">多模型随心选</h3>
+        <p class="text-xs sm:text-sm text-[#a3a3a3] leading-relaxed">DeepSeek / GLM / Qwen 等主流国产模型支持，一键切换。灵活搭配最佳性价比方案。</p>
+      </div>
+
+      <!-- 特性 3 -->
+      <div class="card-base p-6 reveal">
+        <div class="w-10 h-10 rounded-md bg-emerald-400/10 flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3 class="text-sm font-semibold mb-2">13 位沙雕人物</h3>
+        <p class="text-xs sm:text-sm text-[#a3a3a3] leading-relaxed">每人拥有独立人格、独立工作区与系统提示词。就像一群性格各异的朋友，选择最适合的那位陪你工作学习。</p>
+      </div>
+
+      <!-- 特性 4 -->
+      <div class="card-base p-6 reveal">
+        <div class="w-10 h-10 rounded-md bg-amber-400/10 flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><rect x="4" y="4" width="16" height="8" rx="2"/><path d="M12 16v-3"/><path d="M10 13h4"/></svg>
+        </div>
+        <h3 class="text-sm font-semibold mb-2">盲盒抽卡收集</h3>
+        <p class="text-xs sm:text-sm text-[#a3a3a3] leading-relaxed">使用 Agent 对话自动赚取沙雕币，在盲盒中抽取稀有皮肤。普通/稀有/史诗/传说四档，13 款皮肤等你收集。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ② 大魏人物图鉴 ===== -->
+  <section class="max-w-6xl mx-auto px-4 py-16 sm:py-24">
+    <div class="text-center mb-12 reveal">
+      <h2 class="text-2xl sm:text-3xl font-bold mb-3">大魏王朝人物图鉴</h2>
+      <p class="text-[#a3a3a3] max-w-lg mx-auto">
+        13 位性格各异的沙雕人物，每位拥有独立人格与专属工作区。<br class="hidden sm:block" />
+        使用 Agent 赚取沙雕币，在盲盒中抽取稀有皮肤，集齐全套图鉴！
+      </p>
+    </div>
+
+    <!-- 稀有度图例（可点击过滤） -->
+    <div class="flex flex-wrap justify-center gap-3 mb-10 reveal" id="rarityFilter">
+      <button class="rarity-filter-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-all
+        bg-white/10 border-white/20 text-[#fafafa]" data-rarity="all">
+        全部
+      </button>
+      <button class="rarity-filter-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-all
+        border-[#34d399]/30 text-[#a3a3a3] hover:border-[#34d399]/60" data-rarity="common">
+        <span class="w-2 h-2 rounded-full bg-[#34d399]"></span> 普通
+      </button>
+      <button class="rarity-filter-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-all
+        border-[#60a5fa]/30 text-[#a3a3a3] hover:border-[#60a5fa]/60" data-rarity="rare">
+        <span class="w-2 h-2 rounded-full bg-[#60a5fa]"></span> 稀有
+      </button>
+      <button class="rarity-filter-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-all
+        border-[#c084fc]/30 text-[#a3a3a3] hover:border-[#c084fc]/60" data-rarity="epic">
+        <span class="w-2 h-2 rounded-full bg-[#c084fc]"></span> 史诗
+      </button>
+      <button class="rarity-filter-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-all
+        border-[#fbbf24]/30 text-[#a3a3a3] hover:border-[#fbbf24]/60" data-rarity="legendary">
+        <span class="w-2 h-2 rounded-full bg-[#fbbf24]"></span> 传说
+      </button>
+    </div>
+
+    <!-- 卡片网格：sm:2 md:3 lg:4 -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5" id="charGrid">
+
+      <!-- 乞丐虾仁 · 普通（默认皮肤） -->
+      <div class="card-base char-card rarity-common reveal" data-rarity="common">
+        <img src="images/characters/乞丐虾仁/preview.png" alt="乞丐虾仁" loading="lazy" />
+        <div class="char-info">
+          <div class="flex items-center justify-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-[#34d399]"></span>
+            <span class="text-[10px] text-[#34d399] font-medium">普通 · 默认皮肤</span>
+          </div>
+          <h3 class="text-sm font-semibold">乞丐虾仁</h3>
+          <p class="text-xs text-[#a3a3a3] mt-1.5 leading-relaxed">大魏王朝的最底层。破衣烂衫，身无分文，但他的眼神永远亮着光。生活给了他最烂的牌，他却说：「做人嘛，最重要的就是开心啦！」</p>
+        </div>
+      </div>
+
+      <!-- 大魏山匪 · 普通 -->
+      <div class="card-base char-card rarity-common reveal" data-rarity="common">
+        <img src="images/characters/大魏山匪/preview.png" alt="大魏山匪" loading="lazy" />
+        <div class="char-info">
+          <div class="flex items-center justify-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-[#34d399]"></span>
+            <span class="text-[10px] text-[#34d399] font-medium">普通</span>
+          </div>
+          <h3 class="text-sm font-semibold">大魏山匪</h3>
+          <p class="text-xs text-[#a3a3a3] mt-1.5 leading-relaxed">大魏王朝的头号通缉犯，盘踞山林的悍匪。性格狠戾，手段凶残。有人说他是被迫落草，也有人说是天生恶徒。他的名字贴满了各大城池的通缉令。</p>
+        </div>
+      </div>
+
+      <!-- 大魏朝廷钦犯 · 普通 -->
+      <div class="card-base char-card rarity-common reveal" data-rarity="common">
+        <img src="images/characters/大魏朝廷钦犯/preview.png" alt="大魏朝廷钦犯" loading="lazy" />
+        <div class="char-info">
+          <div class="flex items-center justify-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-[#34d399]"></span>
+            <span class="text-[10px] text-[#34d399] font-medium">普通</span>
+          </div>
+          <h3 class="text-sm font-semibold">大魏朝廷钦犯</h3>
+          <p class="text-xs text-[#a3a3a3] mt-1.5 leading-relaxed">昔日位居庙堂，今朝沦为阶下囚。曾是大魏官吏的他，一念之差走上贪赃之路。铁窗之内，他日夜反思：高官厚禄，到头来不过是一场空。</p>
+        </div>
+      </div>
+
+      <!-- 村花小翠 · 普通 -->
+      <div class="card-base char-card rarity-common reveal" data-rarity="common">
+        <img src="images/characters/村花小翠/preview.png" alt="村花小翠" loading="lazy" />
+        <div class="char-info">
+          <div class="flex items-center justify-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-[#34d399]"></span>
+            <span class="text-[10px] text-[#34d399] font-medium">普通</span>
+          </div>
+          <h3 class="text-sm font-semibold">村花小翠</h3>
+          <p class="text-xs text-[#a3a3a3] mt-1.5 leading-relaxed">大魏乡间的明珠，十里八村出了名的热心肠。她性格善良，落落大方，谁家有事她都愿意搭把手。老人们都说：「小翠这丫头，心善人美。」</p>
+        </div>
+      </div>
+
+      <!-- 村草小刘 · 普通 -->
+      <div class="card-base char-card rarity-common reveal" data-rarity="common">
+        <img src="images/characters/村草小刘/preview.png" alt="村草小刘" loading="lazy" />
+        <div class="char-info">
+          <div class="flex items-center justify-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-[#34d399]"></span>
+            <span class="text-[10px] text-[#34d399] font-medium">普通</span>
+          </div>
+          <h3 class="text-sm font-semibold">村草小刘</h3>
+          <p class="text-xs text-[#a3a3a3] mt-1.5 leading-relaxed">大魏乡间的风云人物。家境殷实，打扮时髦，永远走在村里的时尚前沿。据说半个村的姑娘都对他有意思。「这些胭脂俗粉，怎么配得上我？」</p>
+        </div>
+      </div>
+
+      <!-- 村里红衣青年 · 普通 -->
+      <div class="card-base char-card rarity-common reveal" data-rarity="common">
+        <img src="images/characters/村里红衣青年/preview.png" alt="村里红衣青年" loading="lazy" />
+        <div class="char-info">
+          <div class="flex items-center justify-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-[#34d399]"></span>
+            <span class="text-[10px] text-[#34d399] font-medium">普通</span>
+          </div>
+          <h3 class="text-sm font-semibold">村里红衣青年</h3>
+          <p class="text-xs text-[#a3a3a3] mt-1.5 leading-relaxed">大魏乡间的一抹亮色。他总是穿着那件洗得发白但干净整洁的红衣，安稳老实地过着每一天。不争不抢，不怨不尤。平平淡淡，或许就是最好的生活。</p>
+        </div>
+      </div>
+
+      <!-- 寻芳阁女子 · 稀有 -->
+      <div class="card-base char-card rarity-rare reveal" data-rarity="rare">
+        <img src="images/characters/寻芳阁女子/preview.png" alt="寻芳阁女子" loading="lazy" />
+        <div class="char-info">
+          <div class="flex items-center justify-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-[#60a5fa]"></span>
+            <span class="text-[10px] text-[#60a5fa] font-medium">稀有</span>
+          </div>
+          <h3 class="text-sm font-semibold">寻芳阁女子</h3>
+          <p class="text-xs text-[#a3a3a3] mt-1.5 leading-relaxed">大魏娱乐产业的当家花旦，热情似火，八面玲珑。她见过来来往往的达官贵人，听过数不清的秘密心事。「人生苦短，及时行乐。在这寻芳阁里，每个人都能找到一刻的欢愉。」</p>
+        </div>
+      </div>
+
+      <!-- 大魏百夫长 · 稀有 -->
+      <div class="card-base char-card rarity-rare reveal" data-rarity="rare">
+        <img src="images/characters/大魏百夫长/preview.png" alt="大魏百夫长" loading="lazy" />
+        <div class="char-info">
+          <div class="flex items-center justify-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-[#60a5fa]"></span>
+            <span class="text-[10px] text-[#60a5fa] font-medium">稀有</span>
+          </div>
+          <h3 class="text-sm font-semibold">大魏百夫长</h3>
+          <p class="text-xs text-[#a3a3a3] mt-1.5 leading-relaxed">大魏军中铁骨铮铮的硬汉。百场征战，一身伤痕，却从未退后半步。他对朝廷忠心耿耿，对部下视如己出。营中流传着一句话：「百夫长在，阵地就在。」</p>
+        </div>
+      </div>
+
+      <!-- 大魏小卒虾仁 · 稀有 -->
+      <div class="card-base char-card rarity-rare reveal" data-rarity="rare">
+        <img src="images/characters/大魏小卒虾仁/preview.png" alt="大魏小卒虾仁" loading="lazy" />
+        <div class="char-info">
+          <div class="flex items-center justify-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-[#60a5fa]"></span>
+            <span class="text-[10px] text-[#60a5fa] font-medium">稀有</span>
+          </div>
+          <h3 class="text-sm font-semibold">大魏小卒虾仁</h3>
+          <p class="text-xs text-[#a3a3a3] mt-1.5 leading-relaxed">一个穿越到大魏王朝的现代人。醒来发现自己成了一名底层士卒，不懂武功，不谙朝局，靠着一点现代知识和不服输的劲儿艰难求存。每一天都是生死考验。</p>
+        </div>
+      </div>
+
+      <!-- 大魏朝廷官员 · 史诗 -->
+      <div class="card-base char-card rarity-epic reveal" data-rarity="epic">
+        <img src="images/characters/大魏朝廷官员/preview.png" alt="大魏朝廷官员" loading="lazy" />
+        <div class="char-info">
+          <div class="flex items-center justify-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-[#c084fc]"></span>
+            <span class="text-[10px] text-[#c084fc] font-medium">史诗</span>
+          </div>
+          <h3 class="text-sm font-semibold">大魏朝廷官员</h3>
+          <p class="text-xs text-[#a3a3a3] mt-1.5 leading-relaxed">大魏权力中枢的重要一员。手持玉笏，身着朝服，每日穿行于庙堂之上。他秉公执政，不偏不倚。有人曾问他为官之道，他只答了四个字：「无愧于心。」</p>
+        </div>
+      </div>
+
+      <!-- 大魏权臣嫡女 · 史诗 -->
+      <div class="card-base char-card rarity-epic reveal" data-rarity="epic">
+        <img src="images/characters/大魏权臣嫡女/preview.png" alt="大魏权臣嫡女" loading="lazy" />
+        <div class="char-info">
+          <div class="flex items-center justify-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-[#c084fc]"></span>
+            <span class="text-[10px] text-[#c084fc] font-medium">史诗</span>
+          </div>
+          <h3 class="text-sm font-semibold">大魏权臣嫡女</h3>
+          <p class="text-xs text-[#a3a3a3] mt-1.5 leading-relaxed">大魏精英阶层的明珠，自幼习六艺、读经史，琴棋书画无一不精。举手投足间自带一股「大女主」气场——不怒自威，谈笑间掌控全局。</p>
+        </div>
+      </div>
+
+      <!-- 大魏紫霞郡主 · 传说 -->
+      <div class="card-base char-card rarity-legendary reveal" data-rarity="legendary">
+        <img src="images/characters/大魏紫霞郡主/preview.png" alt="大魏紫霞郡主" loading="lazy" />
+        <div class="char-info">
+          <div class="flex items-center justify-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-[#fbbf24]"></span>
+            <span class="text-[10px] text-[#fbbf24] font-medium">传说</span>
+          </div>
+          <h3 class="text-sm font-semibold">大魏紫霞郡主</h3>
+          <p class="text-xs text-[#a3a3a3] mt-1.5 leading-relaxed">大魏王朝的掌上明珠，活泼灵动，笑靥如花。从小在皇城中长大，见惯了规矩，却也养出了一点小任性。「本郡主想做什么，还需要理由吗？」</p>
+        </div>
+      </div>
+
+      <!-- 大魏太子虾仁 · 传说 · 隐藏款 -->
+      <div class="card-base char-card rarity-legendary char-hidden reveal" data-rarity="legendary">
+        <div class="char-media">
+          <img src="images/characters/大魏太子虾仁/preview.png" alt="???" loading="lazy" />
+          <div class="hidden-overlay">
+            <span class="text-5xl font-bold text-[#fbbf24] drop-shadow-lg" style="text-shadow: 0 0 20px rgba(251,191,36,0.6)">?</span>
+          </div>
+        </div>
+        <div class="char-info">
+          <div class="flex items-center justify-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-[#fbbf24]"></span>
+            <span class="text-[10px] text-[#fbbf24] font-medium">传说 · 隐藏</span>
+          </div>
+          <h3 class="text-sm font-semibold">大魏太子虾仁 👑</h3>
+          <p class="text-xs text-[#a3a3a3] mt-1.5 leading-relaxed">大魏王朝的未来继承人因意外身死，穿越者虾仁机缘巧合下附身其躯，并获得其生前记忆。随着新的穿越生活的展开，虾仁又双叒一次被迫卷入了朝堂上的明争暗斗之中……</p>
+          <p class="text-[10px] text-[#fbbf24]/60 mt-1.5">—— 盲盒限定隐藏款 ——</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== ④ 下载区 ===== -->
+  <section id="download" class="max-w-3xl mx-auto px-4 py-16 sm:py-20 text-center reveal">
+    <h2 class="text-2xl sm:text-3xl font-bold mb-3">开启在大魏王朝的 AI 探索之旅</h2>
+    <p class="text-[#a3a3a3] mb-10">选择你的平台，下载沙雕智能体</p>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <!-- macOS -->
+      <div class="card-base p-6 flex-1 max-w-xs mx-auto">
+        <svg class="w-10 h-10 text-[#fafafa] mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v12"/><path d="m9 10 3 3 3-3"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg>
+        <h3 class="font-semibold mb-1">macOS</h3>
+        <p class="text-xs text-[#a3a3a3] mb-4">Apple Silicon / Intel · macOS 12+</p>
+        <a href="#" class="btn-download btn-primary text-sm w-full justify-center">下载 .dmg</a>
+      </div>
+
+      <!-- Windows -->
+      <div class="card-base p-6 flex-1 max-w-xs mx-auto">
+        <svg class="w-10 h-10 text-[#fafafa] mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <h3 class="font-semibold mb-1">Windows</h3>
+        <p class="text-xs text-[#a3a3a3] mb-4">Windows 10+ · x64</p>
+        <a href="#" class="btn-download btn-outline text-sm w-full justify-center">下载 .exe</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ⑤ Footer ===== -->
+  <footer class="border-t border-[#383838] mt-8">
+    <div class="max-w-5xl mx-auto px-4 py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <img src="images/shadiao-logo.png" alt="" class="w-6 h-6 opacity-60 rounded-md" />
+        <span class="text-sm text-[#a3a3a3]">© 2026 沙雕智能体</span>
+      </div>
+
+      <div class="flex items-center gap-6">
+        <!-- 微信公众号 -->
+        <div class="wechat-trigger relative" onclick="this.classList.toggle('show-qr')">
+          <span class="text-sm text-[#a3a3a3] hover:text-[#fafafa] cursor-pointer transition-colors select-none">
+            <svg class="w-4 h-4 inline-block mr-1 -mt-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm3.683 2.99c-3.252 0-5.903 2.087-5.903 4.648 0 2.562 2.651 4.649 5.903 4.649.322 0 .644-.02.957-.065a.95.95 0 0 1 .766.106l1.76 1.03c.048.027.106.05.161.05a.28.28 0 0 0 .279-.284c0-.069-.027-.137-.046-.204l-.381-1.437a.58.58 0 0 1 .21-.642C20.68 15.83 21.78 14.5 21.78 13.1c0-2.562-2.651-4.118-6.498-4.118zm-2.06 2.15c.534 0 .967.433.967.966a.97.97 0 0 1-.967.966.97.97 0 0 1-.967-.966c0-.534.433-.967.967-.967zm4.12 0c.533 0 .966.433.966.966a.97.97 0 0 1-.966.966.97.97 0 0 1-.967-.966c0-.534.433-.967.967-.967z"/></svg>
+            微信公众号
+          </span>
+          <div class="wechat-qr">
+            <div class="wechat-qr-placeholder">
+              <img src="images/wechat-qr.jpg" alt="沙雕智能体微信公众号" class="w-40 h-40 object-cover rounded" />
+            </div>
+            <p class="text-[10px] text-[#a3a3a3] mt-2 text-center">关注获取最新资讯</p>
+          </div>
+        </div>
+
+        <a href="#" class="text-sm text-[#a3a3a3] hover:text-[#fafafa] transition-colors">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== 滚动渐入 ===== -->
+  <script>
+    (function() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    })();
+
+    // 移动端微信二维码：点击外部关闭
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.wechat-trigger')) {
+        document.querySelectorAll('.wechat-trigger.show-qr').forEach(el => {
+          el.classList.remove('show-qr');
+        });
+      }
+    });
+
+    // 稀有度过滤
+    (function() {
+      const filterBtns = document.querySelectorAll('#rarityFilter .rarity-filter-btn');
+      const cards = document.querySelectorAll('#charGrid > [data-rarity]');
+
+      const activeStyle = {
+        all:       'bg-white/10 border-white/20 text-[#fafafa]',
+        common:    'bg-[#34d399]/15 border-[#34d399]/50 text-[#34d399]',
+        rare:      'bg-[#60a5fa]/15 border-[#60a5fa]/50 text-[#60a5fa]',
+        epic:      'bg-[#c084fc]/15 border-[#c084fc]/50 text-[#c084fc]',
+        legendary: 'bg-[#fbbf24]/15 border-[#fbbf24]/50 text-[#fbbf24]',
+      };
+
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          const rarity = this.dataset.rarity;
+
+          // 更新按钮状态
+          filterBtns.forEach(b => {
+            b.className = b.className.replace(
+              /bg-\[[^\]]+\]\s+border-\[[^\]]+\]\s+text-\[[^\]]+\]/,
+              'border-[#34d399]/30 text-[#a3a3a3]'
+            );
+            // Reset to default style
+            const r = b.dataset.rarity;
+            b.className = 'rarity-filter-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-all';
+            if (r === rarity) {
+              b.className += ' ' + activeStyle[r];
+            } else {
+              const inactiveColors = {
+                common:    'border-[#34d399]/30 text-[#a3a3a3] hover:border-[#34d399]/60',
+                rare:      'border-[#60a5fa]/30 text-[#a3a3a3] hover:border-[#60a5fa]/60',
+                epic:      'border-[#c084fc]/30 text-[#a3a3a3] hover:border-[#c084fc]/60',
+                legendary: 'border-[#fbbf24]/30 text-[#a3a3a3] hover:border-[#fbbf24]/60',
+                all:       'border-white/20 text-[#a3a3a3] hover:border-white/40',
+              };
+              b.className += ' ' + (inactiveColors[r] || '');
+            }
+          });
+
+          // 过滤卡片
+          cards.forEach(card => {
+            if (rarity === 'all' || card.dataset.rarity === rarity) {
+              card.style.display = '';
+              // 重新触发渐入动画
+              card.classList.remove('visible');
+              requestAnimationFrame(() => {
+                card.classList.add('visible');
+              });
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
