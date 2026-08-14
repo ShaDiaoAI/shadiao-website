@@ -176,6 +176,18 @@
       background: rgba(255,255,255,0.08);
     }
 
+    /* ===== OS 探测高光 ===== */
+    .platform-card-active {
+      border-color: rgba(167,139,250,0.6);
+      box-shadow: 0 0 0 1px rgba(167,139,250,0.35), 0 8px 32px -4px rgba(96,165,250,0.25), 0 4px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.10);
+    }
+    .mobile-hint {
+      display: none;
+    }
+    .mobile-hint.visible {
+      display: block;
+    }
+
     /* ===== 微信公众号 ===== */
     .wechat-qr {
       display: none;
@@ -265,16 +277,19 @@
     </p>
 
     <!-- 下载按钮 -->
-    <div class="flex flex-wrap gap-3 justify-center animate-fade-up" style="animation-delay:0.3s">
-      <a href="#download" class="btn-download btn-primary">
+    <div class="flex flex-wrap gap-3 justify-center animate-fade-up" style="animation-delay:0.3s" id="hero-download-btns">
+      <a href="#download" class="btn-download btn-primary" data-platform="macOS">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v12"/><path d="m9 10 3 3 3-3"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg>
         下载 macOS 版
       </a>
-      <a href="#download" class="btn-download btn-outline">
+      <a href="#download" class="btn-download btn-outline" data-platform="Windows">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         下载 Windows 版
       </a>
     </div>
+    <p class="mobile-hint text-[#a3a3a3] text-sm mt-2 animate-fade-up" style="animation-delay:0.3s">
+      沙雕智能体目前仅支持 macOS / Windows 桌面端，请在电脑上访问下载
+    </p>
 
     <!-- 向下箭头 -->
     <div class="absolute bottom-8 opacity-40 animate-float">
@@ -549,25 +564,28 @@
   <section id="download" class="max-w-3xl mx-auto px-4 py-16 sm:py-20 text-center reveal">
     <h2 class="text-2xl sm:text-3xl font-bold mb-3">开启在大魏王朝的 AI 探索之旅</h2>
     <p class="text-[#a3a3a3] mb-10">选择你的平台，下载沙雕智能体</p>
+    <p class="mobile-hint text-[#a3a3a3] text-sm -mt-6 mb-8">
+      沙雕智能体目前仅支持 macOS / Windows 桌面端，请在电脑上访问下载
+    </p>
 
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
       <!-- macOS -->
-      <div class="card-base p-6 flex-1 max-w-xs mx-auto">
+      <div class="card-base p-6 flex-1 max-w-xs mx-auto" data-platform-card="macOS">
         <svg class="w-10 h-10 text-[#fafafa] mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v12"/><path d="m9 10 3 3 3-3"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg>
         <h3 class="font-semibold mb-1">macOS</h3>
         <p class="text-xs text-[#a3a3a3] mb-4">macOS 12+</p>
         <div class="flex flex-col gap-2">
-          <a href="https://shadiaoai-1451923852.cos.ap-shanghai.myqcloud.com/downloads/mac-arm64/ShaDiaoAgent-1.0.7-arm64.dmg" class="btn-download btn-primary text-sm w-full justify-center">Apple Silicon 版 (.dmg)</a>
-          <a href="https://shadiaoai-1451923852.cos.ap-shanghai.myqcloud.com/downloads/mac-x64/ShaDiaoAgent-1.0.7-x64.dmg" class="btn-download btn-outline text-sm w-full justify-center">Intel 版 (.dmg)</a>
+          <a href="https://shadiaoai-1451923852.cos.ap-shanghai.myqcloud.com/downloads/mac-arm64/ShaDiaoAgent-1.0.7-arm64.dmg" class="btn-download btn-primary text-sm w-full justify-center download-link">Apple Silicon 版 (.dmg)</a>
+          <a href="https://shadiaoai-1451923852.cos.ap-shanghai.myqcloud.com/downloads/mac-x64/ShaDiaoAgent-1.0.7-x64.dmg" class="btn-download btn-outline text-sm w-full justify-center download-link">Intel 版 (.dmg)</a>
         </div>
       </div>
 
       <!-- Windows -->
-      <div class="card-base p-6 flex-1 max-w-xs mx-auto">
+      <div class="card-base p-6 flex-1 max-w-xs mx-auto" data-platform-card="Windows">
         <svg class="w-10 h-10 text-[#fafafa] mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         <h3 class="font-semibold mb-1">Windows</h3>
         <p class="text-xs text-[#a3a3a3] mb-4">Windows 10+ · x64</p>
-        <a href="https://shadiaoai-1451923852.cos.ap-shanghai.myqcloud.com/downloads/windows/ShaDiaoAgent-Setup-1.0.7-x64.exe" class="btn-download btn-outline text-sm w-full justify-center">下载 .exe</a>
+        <a href="https://shadiaoai-1451923852.cos.ap-shanghai.myqcloud.com/downloads/windows/ShaDiaoAgent-Setup-1.0.7-x64.exe" class="btn-download btn-outline text-sm w-full justify-center download-link">下载 .exe</a>
       </div>
     </div>
   </section>
@@ -678,6 +696,61 @@
           });
         });
       });
+    })();
+
+    // ===== OS 探测 + 平台高光 =====
+    (function() {
+      function detectPlatform() {
+        const ua = navigator.userAgent || '';
+
+        // 移动端优先（含 iPad 桌面模式）
+        if (/iPhone|iPod|Android/i.test(ua)) return 'mobile';
+        if (/iPad/i.test(ua) || (/Macintosh/i.test(ua) && (navigator.maxTouchPoints || 0) > 1)) return 'mobile';
+
+        // User-Agent Client Hints（Chrome/Edge/Safari 16.4+）
+        const p = navigator.userAgentData && navigator.userAgentData.platform;
+        if (p) {
+          if (/mac/i.test(p)) return 'macOS';
+          if (/win/i.test(p)) return 'Windows';
+          return 'unknown';
+        }
+
+        // 回退 UA / platform
+        if (/Macintosh|Mac OS/i.test(ua) || navigator.platform === 'MacIntel') return 'macOS';
+        if (/Windows|Win32|Win64/i.test(ua) || navigator.platform === 'Win32') return 'Windows';
+        return 'unknown';
+      }
+
+      function applyPlatform(os) {
+        const heroBtns = document.querySelectorAll('#hero-download-btns [data-platform]');
+        const cards = document.querySelectorAll('[data-platform-card]');
+        const links = document.querySelectorAll('#download .download-link');
+        const hints = document.querySelectorAll('.mobile-hint');
+
+        if (os === 'mobile') {
+          // 移动端：隐藏下载入口，显示弱提示
+          const heroWrap = document.getElementById('hero-download-btns');
+          if (heroWrap) heroWrap.style.display = 'none';
+          links.forEach(l => { l.style.display = 'none'; });
+          hints.forEach(h => { h.classList.add('visible'); });
+          return;
+        }
+
+        // 桌面端：切换 Hero 按钮高光
+        heroBtns.forEach(btn => {
+          const isActive = btn.dataset.platform === os;
+          btn.classList.toggle('btn-primary', isActive);
+          btn.classList.toggle('btn-outline', !isActive);
+        });
+
+        // 桌面端：切换下载区卡片高光
+        cards.forEach(card => {
+          const isActive = card.dataset.platformCard === os;
+          card.classList.toggle('platform-card-active', isActive);
+        });
+      }
+
+      applyPlatform(detectPlatform());
     })();
   </script>
 </body>
