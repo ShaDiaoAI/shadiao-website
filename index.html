@@ -266,11 +266,11 @@
 
     <!-- 下载按钮 -->
     <div class="flex flex-wrap gap-3 justify-center animate-fade-up" style="animation-delay:0.3s">
-      <a href="#" class="btn-download btn-primary">
+      <a href="#download" class="btn-download btn-primary">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v12"/><path d="m9 10 3 3 3-3"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg>
         下载 macOS 版
       </a>
-      <a href="#" class="btn-download btn-outline">
+      <a href="#download" class="btn-download btn-outline">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         下载 Windows 版
       </a>
@@ -555,8 +555,11 @@
       <div class="card-base p-6 flex-1 max-w-xs mx-auto">
         <svg class="w-10 h-10 text-[#fafafa] mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v12"/><path d="m9 10 3 3 3-3"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg>
         <h3 class="font-semibold mb-1">macOS</h3>
-        <p class="text-xs text-[#a3a3a3] mb-4">Apple Silicon / Intel · macOS 12+</p>
-        <a href="#" class="btn-download btn-primary text-sm w-full justify-center">下载 .dmg</a>
+        <p class="text-xs text-[#a3a3a3] mb-4">macOS 12+</p>
+        <div class="flex flex-col gap-2">
+          <a href="https://shadiaoai-1451923852.cos.ap-shanghai.myqcloud.com/downloads/mac-arm64/ShaDiaoAgent-1.0.7-arm64.dmg" class="btn-download btn-primary text-sm w-full justify-center">Apple Silicon 版 (.dmg)</a>
+          <a href="https://shadiaoai-1451923852.cos.ap-shanghai.myqcloud.com/downloads/mac-x64/ShaDiaoAgent-1.0.7-x64.dmg" class="btn-download btn-outline text-sm w-full justify-center">Intel 版 (.dmg)</a>
+        </div>
       </div>
 
       <!-- Windows -->
@@ -564,7 +567,7 @@
         <svg class="w-10 h-10 text-[#fafafa] mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         <h3 class="font-semibold mb-1">Windows</h3>
         <p class="text-xs text-[#a3a3a3] mb-4">Windows 10+ · x64</p>
-        <a href="#" class="btn-download btn-outline text-sm w-full justify-center">下载 .exe</a>
+        <a href="https://shadiaoai-1451923852.cos.ap-shanghai.myqcloud.com/downloads/windows/ShaDiaoAgent-Setup-1.0.7-x64.exe" class="btn-download btn-outline text-sm w-full justify-center">下载 .exe</a>
       </div>
     </div>
   </section>
