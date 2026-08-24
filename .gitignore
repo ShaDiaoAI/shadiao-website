@@ -17,3 +17,4 @@ Icon
 *.log
 
 DESIGN.md
+deploy.sh
