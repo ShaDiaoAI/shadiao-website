@@ -3,54 +3,86 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>沙雕智能体 — 大魏王朝</title>
-  <meta name="description" content="沙雕智能体 1.0：大魏王朝 — 与沙雕人物一起探索 AI 的奥秘。Claude Agent SDK 集成，多模型选择，盲盒抽卡收集。" />
+  <title>沙雕智能体 — 大魏王朝｜AI Agent 桌面客户端</title>
+  <meta name="description" content="沙雕智能体（ShaDiaoAI）是一款面向 macOS 与 Windows 的 AI Agent 桌面客户端。基于 Claude Agent SDK 编排，支持 DeepSeek、Kimi、通义千问等主流国产模型一键切换，内置 17 位独立人格的沙雕人物与盲盒皮肤收集系统。" />
+  <meta name="keywords" content="沙雕智能体,ShaDiaoAI,AI Agent,AI 客户端,桌面智能体,大魏王朝,盲盒皮肤,Claude Agent SDK,DeepSeek 客户端" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta name="author" content="沙雕智能体" />
+  <link rel="canonical" href="https://shadiao.online/" />
   <link rel="icon" href="images/shadiao-logo.png" type="image/png" />
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter Variable', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', 'system-ui', 'sans-serif'],
-          },
-          colors: {
-            surface:   '#121212',
-            elevated:  '#1a1a1a',
-            card:      '#212121',
-            border:    '#383838',
-            muted:     '#a3a3a3',
-            foreground:'#fafafa',
-            'rarity-common':    '#34d399',
-            'rarity-rare':      '#60a5fa',
-            'rarity-epic':      '#c084fc',
-            'rarity-legendary': '#fbbf24',
-          },
-          animation: {
-            'fade-up': 'fadeUp 0.6s ease-out both',
-            'glow': 'glow 2s ease-in-out infinite',
-            'float': 'float 6s ease-in-out infinite',
-          },
-          keyframes: {
-            fadeUp: {
-              from: { opacity: '0', transform: 'translateY(24px)' },
-              to:   { opacity: '1', transform: 'translateY(0)' },
-            },
-            glow: {
-              '0%,100%': { boxShadow: '0 0 20px rgba(168,85,247,0.15), 0 0 40px rgba(168,85,247,0.05)' },
-              '50%':     { boxShadow: '0 0 30px rgba(168,85,247,0.3), 0 0 60px rgba(168,85,247,0.12)' },
-            },
-            float: {
-              '0%,100%': { transform: 'translateY(0)' },
-              '50%':     { transform: 'translateY(-10px)' },
-            },
-          },
-        },
+  <!-- Open Graph / 社交分享 -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="沙雕智能体" />
+  <meta property="og:title" content="沙雕智能体 — 大魏王朝｜AI Agent 桌面客户端" />
+  <meta property="og:description" content="与 17 位沙雕人物一起探索 AI 的奥秘。Claude Agent SDK 编排，多模型一键切换，盲盒抽卡收集皮肤。" />
+  <meta property="og:url" content="https://shadiao.online/" />
+  <meta property="og:image" content="https://shadiao.online/images/shadiao-logo.png" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!--
+    Tailwind CSS（本地构建，替代原来的 cdn.tailwindcss.com）
+    改动本文件后需要重新执行：bash build-css.sh
+    配置见 tailwind.config.js
+  -->
+  <link rel="stylesheet" href="tailwind.css" />
+
+  <!-- 结构化数据：帮助搜索引擎与 AI 搜索正确识别品牌实体 -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://shadiao.online/#organization",
+        "name": "沙雕智能体",
+        "alternateName": ["ShaDiaoAI", "ShaDiao Agent", "沙雕智能体 1.0"],
+        "url": "https://shadiao.online/",
+        "logo": "https://shadiao.online/images/shadiao-logo.png",
+        "description": "沙雕智能体（ShaDiaoAI）是一款面向 macOS 与 Windows 的 AI Agent 桌面客户端，通过趣味化的沙雕人物降低普通人使用 AI 智能体的门槛。",
+        "sameAs": [
+          "https://github.com/ShaDiaoAI",
+          "https://watcha.cn/products/2984"
+        ]
       },
-    }
+      {
+        "@type": "WebSite",
+        "@id": "https://shadiao.online/#website",
+        "url": "https://shadiao.online/",
+        "name": "沙雕智能体",
+        "inLanguage": "zh-CN",
+        "publisher": { "@id": "https://shadiao.online/#organization" }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://shadiao.online/#software",
+        "name": "沙雕智能体",
+        "alternateName": "ShaDiaoAI",
+        "applicationCategory": "DeveloperApplication",
+        "applicationSubCategory": "AI Agent 客户端",
+        "operatingSystem": "macOS, Windows",
+        "softwareVersion": "1.3.0",
+        "inLanguage": "zh-CN",
+        "url": "https://shadiao.online/",
+        "description": "基于 Claude Agent SDK 编排的 AI Agent 桌面客户端，支持 DeepSeek、Kimi、通义千问等主流国产模型一键切换，内置 17 位独立人格的沙雕人物与盲盒皮肤收集系统。",
+        "featureList": [
+          "Claude Agent SDK 集成，支持自主规划、工具调用、多轮深度对话",
+          "多模型一键切换，接入 DeepSeek、Kimi、通义千问等主流国产模型",
+          "17 位独立人格的沙雕人物，每位拥有独立工作区与系统提示词",
+          "盲盒抽卡收集皮肤，普通 / 稀有 / 史诗 / 传说四档",
+          "macOS 与 Windows 双平台桌面客户端"
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "CNY",
+          "description": "提供免费试用额度，新用户可获赠词元与沙雕币"
+        },
+        "publisher": { "@id": "https://shadiao.online/#organization" }
+      }
+    ]
+  }
   </script>
 
   <style>
